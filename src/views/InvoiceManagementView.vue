@@ -15,36 +15,40 @@
             </template>
         </el-dialog>
 
-        <el-dialog v-model="isDetailDialogVisible" title="销售发票详情" width="70%">
+        <!-- 查看详情对话框 -->
+        <el-dialog v-model="isDetailDialogVisible" title="销售发票详情" width="60%">
             <div v-if="selectedInvoiceDetail" class="invoice-detail-content">
-                <el-descriptions :column="2" style="width: 80%; margin:10px auto">
+                <!-- 主要信息：添加边框，统一宽度 -->
+                <el-descriptions :column="2" border style="width: 90%; margin: 0 auto;">
                     <el-descriptions-item label="发票号">{{ selectedInvoiceDetail.id }}</el-descriptions-item>
                     <el-descriptions-item label="客户">{{ selectedInvoiceDetail.customer?.name ?? 'N/A'
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="开票日期">{{ selectedInvoiceDetail.date_posted }}</el-descriptions-item>
                     <el-descriptions-item label="到期日">{{ selectedInvoiceDetail.date_due || 'N/A'
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="状态">
-                        <el-tag :type="selectedInvoiceDetail.active ? 'success' : 'danger'">
-                            {{ selectedInvoiceDetail.active ? '正常' : '已作废' }}
+                        <el-tag :type="getStatusType(selectedInvoiceDetail)">
+                            {{ getStatusText(selectedInvoiceDetail) }}
                         </el-tag>
                     </el-descriptions-item>
                     <el-descriptions-item label="总金额">¥{{ calculateTotal(selectedInvoiceDetail.entries).toFixed(2)
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                     <el-descriptions-item label="备注" :span="2">{{ selectedInvoiceDetail.notes || 'N/A'
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                 </el-descriptions>
+
+                <!-- 明细项：添加分割线，统一宽度 -->
                 <el-divider />
-                <h4>明细项</h4>
-                <el-table :data="selectedInvoiceDetail.entries" size="small" style="width: 80%;margin:10px auto">
-                    <el-table-column prop="description" label="描述" min-width="100" />
-                    <el-table-column prop="quantity_num" label="数量" width="80" text-align="center" />
-                    <el-table-column prop="price" label="单价" width="100" text-align="right">
+                <h4 style="text-align: center; margin-bottom: 16px;">明细项</h4>
+                <el-table :data="selectedInvoiceDetail.entries" size="small" border style="width: 90%; margin: 0 auto;">
+                    <el-table-column prop="description" label="描述" min-width="150" />
+                    <el-table-column prop="quantity_num" label="数量" width="80" align="center" />
+                    <el-table-column prop="price" label="单价" width="120" align="right">
                         <template #default="scope">¥{{ Number(scope.row.price).toFixed(2) }}</template>
                     </el-table-column>
-                    <el-table-column label="小计" width="100" text-align="right">
+                    <el-table-column label="小计" width="120" align="right">
                         <template #default="scope">¥{{ (Number(scope.row.price) * scope.row.quantity_num).toFixed(2)
-                        }}</template>
+                            }}</template>
                     </el-table-column>
                 </el-table>
             </div>
@@ -107,7 +111,6 @@ const handleEdit = async (invoice: Invoice) => {
     isFormDialogVisible.value = true;
 };
 
-
 const handleSubmit = async () => {
     if (!formRef.value) return;
     isSubmitting.value = true;
@@ -125,12 +128,9 @@ const handleSubmit = async () => {
         await fetchInvoices();
     } catch (error: any) {
         console.error('Submit failed:', error);
-        // 检查是否是 409 Conflict 错误
         if (error.response?.status === 409) {
-            // 显示后端返回的具体错误信息，或者一个友好的默认提示
             ElMessage.error(error.response.data.detail || '发票号已存在，请更换后重试。');
         } else {
-            // 对于其他错误，显示通用错误信息
             ElMessage.error(error.message || '操作失败，请检查输入或联系管理员。');
         }
     } finally {
@@ -163,7 +163,6 @@ const handleVoid = async (invoice: Invoice) => {
     } catch (error: any) { if (error !== 'cancel') { ElMessage.error('作废失败'); } }
 };
 
-
 const handleUnvoid = async (invoice: Invoice) => {
     try {
         await ElMessageBox.confirm(`确定要取消作废发票 "${invoice.id}" 吗？`, '确认取消作废', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'success' });
@@ -179,6 +178,15 @@ const calculateTotal = (entries: any[]) => {
     return entries.reduce((total, entry) => total + (Number(entry.price) * entry.quantity_num), 0);
 };
 
+// ========== 新增：状态显示函数 ==========
+const getStatusType = (invoice: Invoice) => {
+    return invoice.active ? 'success' : 'danger';
+};
+
+const getStatusText = (invoice: Invoice) => {
+    return invoice.active ? '正常' : '已作废';
+};
+
 onMounted(fetchInvoices);
 </script>
 
@@ -189,7 +197,16 @@ onMounted(fetchInvoices);
     font-weight: 600;
 }
 
+.invoice-detail-content {
+    padding: 0 20px;
+}
+
 .invoice-detail-content .el-descriptions {
     margin-bottom: 20px;
+}
+
+.invoice-detail-content h4 {
+    color: #606266;
+    font-weight: 500;
 }
 </style>
