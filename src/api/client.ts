@@ -38,7 +38,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 // 创建纯净的 axios 实例
 const pureApiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'https://www.financemirror.icu',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
