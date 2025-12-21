@@ -35,7 +35,7 @@ export interface PureAxiosInstance {
 
 // 创建纯净的 axios 实例
 const pureApiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ? 'https://www.financemirror.icu/api/v1' : '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL ? 'https://www.financemirror.icu',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
