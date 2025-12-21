@@ -34,7 +34,7 @@ export interface PureAxiosInstance {
 }
 
 // 从环境变量获取 API 基础 URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://www.financemirror.icu/api/v1'
 
 // 创建纯净的 axios 实例
 const pureApiClient = axios.create({
